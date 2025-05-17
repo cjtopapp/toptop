@@ -12,12 +12,14 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 def ask():
     print("✅ /ask 진입됨")
 
-    data = request.get_json()
-    question = data.get("question", "")
-    print("👉 받은 질문:", question)
-
     try:
-        print("🚀 서버 호출 시작")  # ← 여기 꼭 삽입
+        data = request.get_json()
+        print("📦 Raw data:", data)
+
+        question = data.get("question", "")
+        print("👉 받은 질문:", question)
+
+        print("🚀 GPT 호출 시도")
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -26,10 +28,11 @@ def ask():
             ]
         )
         answer = response['choices'][0]['message']['content']
-        print("✅ 서버 응답:", answer)
+        print("✅ GPT 응답:", answer)
     except Exception as e:
-        print("❌ 서버 호출 에러:", e)
+        print("❌ GPT 호출 에러:", e)
         answer = "탑탑이가 이해하기 어려운 질문입니다."
+        
     image_url = None
     if any(keyword in question for keyword in ["원무과", "수납", "접수"]):
         image_url = "https://res.cloudinary.com/duvoimzkv/image/upload/v1747505265/toptop_admdepart_rm36ov.png"
