@@ -4,7 +4,7 @@ import openai
 import os
 
 app = Flask(__name__)
-CORS(app)  # ✅ Flutter Web 요청 허용
+CORS(app)
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
@@ -14,7 +14,7 @@ def ask():
     question = data.get("question", "")
 
     if not question:
-        return jsonify({"answer": "질문이 비어 있습니다.", "image": None}), 400
+        return jsonify({"answer": "질문이 비어 있습니다", "image": None}), 400
 
     print("👉 질문 수신됨:", question)
 
@@ -27,10 +27,10 @@ def ask():
             ]
         )
         answer = response['choices'][0]['message']['content']
-        print("✅ GPT 응답:", answer)
+        print("✅ 탑탑이 :", answer)
     except Exception as e:
-        print("❌ GPT 호출 에러:", e)
-        answer = "GPT 응답에 실패했습니다."
+        print("❌ 탑탑이 고장 :", e)
+        answer = "탑탑이가 이해하기 어려운 질문입니다"
 
     image_url = None
     if any(keyword in question for keyword in ["원무과", "수납", "접수"]):
