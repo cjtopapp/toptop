@@ -11,7 +11,7 @@ CORS(app)
 api_key = os.environ.get("OPENAI_API_KEY")
 openai.api_key = api_key
 
-# Debugging output for API Key state
+# Debugging output
 print("🔧 [DEBUG] OPENAI_API_KEY 존재 여부:", "✅ 있음" if api_key else "❌ 없음")
 if api_key:
     print("🔧 [DEBUG] API Key 앞 5자리:", api_key[:5])
@@ -33,8 +33,8 @@ def ask():
             print("❌ [ERROR] API 키가 설정되어 있지 않습니다.")
             return jsonify({"answer": "서버 오류: API 키가 누락되었습니다", "image": None}), 500
 
-        # GPT 호출
-        response = openai.ChatCompletion.create(
+        # GPT 호출 (openai >= 1.0.0 방식)
+        response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "넌 청주탑병원의 안내 도우미 '탑탑이' 란다. 환자의 질문에 간결하고 친절하게 한글로 답해줘. 100자 이내로 답변해주고, 답변은 200자를 넘지 않았으면 해."},
@@ -42,7 +42,7 @@ def ask():
             ]
         )
 
-        answer = response['choices'][0]['message']['content']
+        answer = response.choices[0].message.content
         print("✅ [DEBUG] GPT 응답:", answer)
 
     except Exception as e:
