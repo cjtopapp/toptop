@@ -56,22 +56,52 @@ def ask():
         if not question:
             return jsonify({"answer": "질문을 입력해 주세요 !", "image": None}), 400
 
-        excel_info = search_semantic(question, df)
+        # --- 질의 확장(Query Expansion) 로직 시작 ---
+        excel_info = None
+        try:
+            # 1. 먼저 사용자의 원본 질문으로 검색 시도
+            excel_info = search_semantic(question, df)
+
+            # 2. 원본 질문으로 못 찾았을 경우, GPT를 이용해 질문 확장
+            if not excel_info:
+                print("1차 검색 실패. 질의 확장을 시도합니다...")
+                expansion_prompt = f"""너는 검색어 확장 전문가야. 사용자의 질문 '{question}'을 받아서, 우리 병원 데이터베이스에서 검색하기 좋은, 의미적으로 유사한 질문 3개를 목록으로 만들어줘. 각 질문은 줄바꿈으로 구분해줘.
+예시: '이형준' -> '이형준 원장님의 전문 진료 분야는 무엇인가요?\n이형준 원장님의 약력이 궁금합니다.\n이형준 원장님 진료 시간 알려주세요.'"""
+
+                expansion_response = openai.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": expansion_prompt}],
+                    temperature=0.5
+                )
+                expanded_questions = expansion_response.choices[0].message.content.strip().split('\n')
+                
+                print(f"확장된 질문: {expanded_questions}")
+
+                # 3. 확장된 질문들로 다시 검색 시도
+                for q in expanded_questions:
+                    excel_info = search_semantic(q, df)
+                    if excel_info:
+                        print(f"'{q}' 질문으로 검색 성공!")
+                        break # 정보를 찾으면 루프 중단
+        except Exception as e:
+            print(f"질의 확장 또는 검색 중 오류 발생: {e}")
+            excel_info = None # 오류 발생 시 excel_info를 None으로 초기화
+        # --- 질의 확장 로직 끝 ---
 
         if not excel_info:
             answer = "죄송하지만 탑탑이가 모르는 내용이에요, 병원에 직접 문의해주세요!"
         else:
+            # (이하 답변 생성 부분은 위의 3번에서 수정한 프롬프트로 동일하게 적용)
             system_prompt = """너는 청주탑병원의 안내 도우미 '탑탑이'다.
-너의 임무는 주어진 '참고 자료'를 바탕으로만 질문에 답변하는 것이다.
-- '참고 자료'에 질문에 대한 내용이 있으면, 해당 내용을 바탕으로 정확하게 답변해야 한다.
-- '참고 자료'에 질문에 대한 내용이 없으면, 절대로 답변을 지어내지 말고 "죄송하지만 탑탑이가 모르는 내용이에요, 병원에 직접 문의해주세요!"라고만 대답해야 한다.
-- 답변은 항상 친절한 말투를 사용하며 한국어로 해야 한다.
-- 200자 이내로 대답하도록 한다."""
+너의 임무는 주어진 '참고 자료'를 바탕으로 사용자의 질문에 답변하는 것이다.
+참고 자료의 내용을 딱딱하게 그대로 읽어주지 말고, '탑탑이'의 역할에 맞게 친절하고 자연스러운 대화체로 정보를 재구성해서 설명해줘.
+단, 참고 자료에 없는 사실을 지어내거나 추가해서는 절대로 안 된다.
+답변은 항상 친절한 말투를 사용하며 한국어로 해야 하고, 200자 이내로 간결하게 요약해줘."""
 
             final_user_content = f"""[참고 자료]
 "{excel_info}"
 
-위 참고 자료를 바탕으로 다음 질문에 답변해줘: {question}"""
+위 참고 자료를 바탕으로 다음 사용자의 원본 질문에 답변해줘: {question}"""
 
             response = openai.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -87,6 +117,7 @@ def ask():
         traceback.print_exc()
         answer = "탑탑이가 대답할 수 없어요 !"
     
+    # (이미지 처리 로직은 그대로 유지)
     image_url = None
     try:
         if any(keyword in question for keyword in ["원무과", "수납", "접수"]):
