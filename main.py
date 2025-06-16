@@ -56,6 +56,41 @@ def ask():
         if not question:
             return jsonify({"answer": "질문을 입력해 주세요 !", "image": None}), 400
 
+        question_normalized = question.strip().lower().replace(" ", "")
+
+        greetings = ["안녕", "하이", "ㅎㅇ", "hi", "hello"]
+        thanks = ["고마워", "감사합니다", "땡큐", "thank"]
+        farewells = ["잘가", "바이", "수고했어", "수고하셨습니다", "안녕히가세요"]
+        identity = ["누구야", "넌누구니", "이름이뭐야", "뭐하는애야", "정체가뭐야"]
+        compliments = ["잘한다", "똑똑하다", "최고야", "좋았어", "훌륭해"]
+        # 필요에 따라 부적절한 단어 목록을 추가할 수 있습니다.
+        profanity = ["바보", "멍청이"] 
+
+        # 키워드 포함 여부 확인 및 즉시 응답
+        if any(keyword in question_normalized for keyword in greetings):
+            answer = "안녕하세요! 청주탑병원 AI 안내원 탑탑이입니다. 무엇을 도와드릴까요?"
+            return jsonify({"answer": answer, "image": None})
+
+        if any(keyword in question_normalized for keyword in thanks):
+            answer = "천만에요! 더 궁금한 점이 있으시면 언제든지 물어보세요."
+            return jsonify({"answer": answer, "image": None})
+
+        if any(keyword in question_normalized for keyword in farewells):
+            answer = "네, 안녕히 가세요. 추가적으로 궁금한 점이 생기시면 언제든지 다시 찾아주세요!"
+            return jsonify({"answer": answer, "image": None})
+            
+        if any(keyword in question_normalized for keyword in identity):
+            answer = "저는 청주탑병원의 궁금한 점을 해결해드리는 AI 안내원 탑탑이입니다."
+            return jsonify({"answer": answer, "image": None})
+
+        if any(keyword in question_normalized for keyword in compliments):
+            answer = "칭찬해주셔서 감사합니다! 더 도움이 될 수 있도록 노력할게요."
+            return jsonify({"answer": answer, "image": None})
+
+        if any(keyword in question_normalized for keyword in profanity):
+            answer = "바르고 고운 말을 사용해주세요. 도움이 필요하시면 다시 질문해주시기 바랍니다."
+            return jsonify({"answer": answer, "image": None})
+       
         # --- 질의 확장(Query Expansion) 로직 시작 ---
         excel_info = None
         try:
