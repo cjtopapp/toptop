@@ -53,10 +53,12 @@ def ask():
     try:
         data = request.get_json()
         question = data.get("question", "")
+        
         if not question:
             return jsonify({"answer": "질문을 입력해 주세요 !", "image": None}), 400
 
         question_normalized = question.strip().lower().replace(" ", "")
+        question_for_search = question.replace(" ", "")
 
         greetings = ["안녕", "하이", "ㅎㅇ", "hi", "hello"]
         thanks = ["고마워", "감사합니다", "땡큐", "thank"]
@@ -95,7 +97,7 @@ def ask():
         excel_info = None
         try:
             # 1. 먼저 사용자의 원본 질문으로 검색 시도
-            excel_info = search_semantic(question, df)
+            excel_info = search_semantic(question_for_search, df)
 
             # 2. 원본 질문으로 못 찾았을 경우, GPT를 이용해 질문 확장
             if not excel_info:
