@@ -102,10 +102,12 @@ Rewrite the user's new question into one complete, clear question. For example, 
                 
         except Exception as e:
             print(f"검색 과정 중 오류 발생: {e}")
-            excel_info = None
+            excel_info = "QUERY_EXPANSION_ERROR"
 
         if not excel_info:
             answer = "죄송하지만 탑탑이가 모르는 내용이에요, 병원에 직접 문의해주세요!"
+        elif excel_info == "QUERY_EXPANSION_ERROR": # [추가됨] 오류 메시지 케이스
+            answer = "죄송하지만 질문을 조금 더 자세하게 해주세요!"
         else:
             # [수정됨] 최종 답변 생성 프롬프트
             system_prompt = """너는 청주탑병원의 안내 도우미 '탑탑이'다. 너의 임무는 주어진 '참고 자료'를 바탕으로 사용자의 질문에 답변하는 것이다. 참고 자료의 내용을 딱딱하게 그대로 읽어주지 말고, '탑탑이'의 역할에 맞게 친절하고 자연스러운 대화체로 정보를 재구성해서 설명해줘. 단, 참고 자료에 없는 사실을 지어내거나 추가해서는 절대로 안 된다. 답변은 항상 친절한 말투를 사용하며 한국어로 해야 하고, 200자 이내로 간결하게 요약해줘."""
