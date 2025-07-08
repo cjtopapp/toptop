@@ -1,3 +1,5 @@
+# toptop_1.0.1
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import openai
@@ -14,7 +16,8 @@ CORS(app)
 # --- 설정 부분 ---
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 EMBEDDED_FILE_PATH = "toptop_with_embeddings.pkl"
-EMBEDDING_MODEL = "text-embedding-3-small"
+EMBEDDING_MODEL = "text-embedding-ada-002"
+SIMILARITY_THRESHOLD = 0.8
 
 # --- 데이터 로딩 및 전처리 ---
 try:

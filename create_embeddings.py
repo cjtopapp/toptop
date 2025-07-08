@@ -1,5 +1,7 @@
-import pandas as pd
-import openai
+# toptop_1.0.1
+
+import pandas as pd # type: ignore
+import openai # type: ignore
 import os
 
 # --- 설정 ---
@@ -12,7 +14,7 @@ if not api_key:
 openai.api_key = api_key
 
 # 2. 사용할 모델 및 파일 경로 지정
-EMBEDDING_MODEL = "text-embedding-3-small"
+EMBEDDING_MODEL = "text-embedding-ada-002"
 EXCEL_PATH = "toptop.xlsx"
 OUTPUT_PATH = "toptop_with_embeddings.pkl" # 최종 결과물이 저장될 파일
 
